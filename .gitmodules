@@ -1,0 +1,9 @@
+[submodule "vendor/imgui"]
+	path = plotter_lib/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "vendor/implot"]
+	path = plotter_lib/implot
+	url = https://github.com/epezent/implot.git
+[submodule "plotter_lib/glfw"]
+	path = plotter_lib/glfw
+	url = https://github.com/glfw/glfw.git
