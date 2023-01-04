@@ -11,18 +11,6 @@
 #include "implot.h"
 #include "implot_demo.h"
 
-struct window_context
-{
-  const char *title;
-  unsigned int width, height;
-  bool full_screen;
-  GLFWwindow *window;
-  plotter_init_cb fn_init;
-  plotter_draw_cb fn_draw;
-  plotter_close_cb fn_close;
-  ImPlotContext *implot_context;
-};
-
 window_context context;
 
 static void glfw_error_callback(int error, const char *description)
@@ -30,18 +18,26 @@ static void glfw_error_callback(int error, const char *description)
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int InitPlotterInit(const char *title, unsigned int screen_width, unsigned int screen_height, plotter_draw_cb draw_func, plotter_init_cb init_func, plotter_close_cb close_func)
+Plotter::Plotter(const char *title, int screen_width, int screen_height,
+                 plotter_draw_cb draw_func,
+                 plotter_init_cb init_func,
+                 plotter_close_cb close_func)
 {
-  context.title = title;
-  context.width = screen_width;
-  context.height = screen_height;
-  context.fn_init = init_func;
-  context.fn_draw = draw_func;
-  context.fn_close = close_func;
+  m_Context.title = title;
+  m_Context.width = screen_width;
+  m_Context.height = screen_height;
+  m_Context.fn_init = init_func;
+  m_Context.fn_draw = draw_func;
+  m_Context.fn_close = close_func;
+  m_Context.clear_color.x = m_Context.clear_color.y = m_Context.clear_color.z = 0.2f;
+  m_Context.clear_color.w = 1.00f;
+}
+bool Plotter::Init()
+{
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
-    return 1;
+    return false;
 
   // GL 3.0 + GLSL 130
   const char *glsl_version = "#version 130";
@@ -49,22 +45,22 @@ int InitPlotterInit(const char *title, unsigned int screen_width, unsigned int s
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
   // Create window with graphics context
-  context.window = glfwCreateWindow(screen_width, screen_height, title, NULL, NULL);
-  if (context.window == NULL)
-    return 1;
-  glfwMakeContextCurrent(context.window);
+  m_Context.window = glfwCreateWindow(m_Context.width, m_Context.height, m_Context.title, NULL, NULL);
+  if (m_Context.window == NULL)
+    return false;
+  glfwMakeContextCurrent(m_Context.window);
   glfwSwapInterval(1); // Enable vsync
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   // Setup Platform/Renderer backends
-  ImGui_ImplGlfw_InitForOpenGL(context.window, true);
+  ImGui_ImplGlfw_InitForOpenGL(m_Context.window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
-  context.implot_context = ImPlot::CreateContext();
-  if (context.fn_init)
+  m_Context.implot_context = ImPlot::CreateContext();
+  if (m_Context.fn_init)
   {
-    context.fn_init();
+    m_Context.fn_init();
   }
   else
   {
@@ -79,13 +75,12 @@ int InitPlotterInit(const char *title, unsigned int screen_width, unsigned int s
     // ImGui::StyleColorsLight();
   }
 
-  // Our state
-  bool show_demo_window = true;
-  bool show_another_window = true;
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+  return true;
+}
+void Plotter::Run()
+{
   // Main loop
-  while (!glfwWindowShouldClose(context.window))
+  while (!glfwWindowShouldClose(m_Context.window))
   {
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -99,32 +94,39 @@ int InitPlotterInit(const char *title, unsigned int screen_width, unsigned int s
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    context.fn_draw();
+    m_Context.fn_draw();
 
     // Rendering
 
     ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(context.window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glfwGetFramebufferSize(m_Context.window, &m_Context.width, &m_Context.height);
+    glViewport(0, 0, m_Context.width, m_Context.height);
+    glClearColor(m_Context.clear_color.x * m_Context.clear_color.w,
+                 m_Context.clear_color.y * m_Context.clear_color.w,
+                 m_Context.clear_color.z * m_Context.clear_color.w,
+                 m_Context.clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(context.window);
+    glfwSwapBuffers(m_Context.window);
   }
-
-  if (context.fn_close)
+}
+void Plotter::Shutdown()
+{
+  if (m_Context.fn_close)
   {
-    context.fn_close();
+    m_Context.fn_close();
   }
   // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 
-  glfwDestroyWindow(context.window);
+  glfwDestroyWindow(m_Context.window);
   glfwTerminate();
+}
 
-  return 0;
+ImVec2 Plotter::WindowSize()
+{
+  return ImVec2((float)m_Context.width, (float)m_Context.height);
 }

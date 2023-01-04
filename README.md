@@ -1,5 +1,5 @@
 # Plotting wrapper for C++
-CMake wrapper lib for fast and easy setup.
+CMake wrapper lib for dear ImGUI and ImPlot fast and easy setup.
 
 ## Platforms
 * Windows
