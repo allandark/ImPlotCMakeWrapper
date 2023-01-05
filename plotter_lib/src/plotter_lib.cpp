@@ -34,6 +34,7 @@ Plotter::Plotter(const char *title, int screen_width, int screen_height,
 }
 bool Plotter::Init()
 {
+  m_ShouldClose = false;
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
@@ -77,39 +78,40 @@ bool Plotter::Init()
 
   return true;
 }
-void Plotter::Run()
+bool Plotter::Update()
 {
   // Main loop
-  while (!glfwWindowShouldClose(m_Context.window))
-  {
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-    glfwPollEvents();
 
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+  m_ShouldClose = glfwWindowShouldClose(m_Context.window);
+  // Poll and handle events (inputs, window resize, etc.)
+  // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+  // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+  // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+  // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+  glfwPollEvents();
 
-    m_Context.fn_draw();
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
 
-    // Rendering
+  m_Context.fn_draw();
 
-    ImGui::Render();
-    glfwGetFramebufferSize(m_Context.window, &m_Context.width, &m_Context.height);
-    glViewport(0, 0, m_Context.width, m_Context.height);
-    glClearColor(m_Context.clear_color.x * m_Context.clear_color.w,
-                 m_Context.clear_color.y * m_Context.clear_color.w,
-                 m_Context.clear_color.z * m_Context.clear_color.w,
-                 m_Context.clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  // Rendering
 
-    glfwSwapBuffers(m_Context.window);
-  }
+  ImGui::Render();
+  glfwGetFramebufferSize(m_Context.window, &m_Context.width, &m_Context.height);
+  glViewport(0, 0, m_Context.width, m_Context.height);
+  glClearColor(m_Context.clear_color.x * m_Context.clear_color.w,
+               m_Context.clear_color.y * m_Context.clear_color.w,
+               m_Context.clear_color.z * m_Context.clear_color.w,
+               m_Context.clear_color.w);
+  glClear(GL_COLOR_BUFFER_BIT);
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+  glfwSwapBuffers(m_Context.window);
+
+  return m_ShouldClose;
 }
 void Plotter::Shutdown()
 {

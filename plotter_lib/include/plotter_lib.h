@@ -29,13 +29,14 @@ public:
           plotter_init_cb init_func = 0,
           plotter_close_cb close_func = 0);
   bool Init();
-  void Run();
+  bool Update();
   void Shutdown();
 
   ImVec2 WindowSize();
 
 private:
   window_context m_Context;
+  bool m_ShouldClose;
 };
 
 #endif

@@ -13,7 +13,13 @@ int main()
   {
     return 1;
   }
-  plot.Run();
+
+  bool is_running = true;
+  while (is_running)
+  {
+    is_running = !plot.Update();
+  }
+
   plot.Shutdown();
   return 0;
 }
@@ -25,12 +31,12 @@ void imgui_init()
 
 void plotter_draw()
 {
-  ImGui::SetNextWindowSize(plot.WindowSize());
-  ImGui::Begin("Demo_LinePlots()"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-                                    // window size auto fit
-  ImPlot::Demo_LinePlots();
+  // ImGui::SetNextWindowSize(plot.WindowSize());
+  // ImGui::Begin("Demo_LinePlots()"); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+  //                                   // window size auto fit
+  // ImPlot::Demo_LinePlots();
 
-  ImGui::End();
+  // ImGui::End();
 
   // ImGui::Begin("Demo_MultipleAxes()");          // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
   // ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f)); // window size auto fit
@@ -44,5 +50,5 @@ void plotter_draw()
   // ImGui::ShowDebugLogWindow(&show_debug_log);
   // ImGui::ShowMetricsWindow(&show_metrics);
 
-  // ImPlot::ShowDemoWindow();
+  ImPlot::ShowDemoWindow();
 }
