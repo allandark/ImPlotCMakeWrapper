@@ -25,8 +25,19 @@ Install deps
 ``` 
 sudo apt install xorg-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
 ``` 
+Git Clone
+``` 
+$ git submodule update --init --recursive
+``` 
 
-Bash
+Run initialize script (will move cmake files to imgui and implot)
+``` 
+$ cd plotter_lib
+$ chmod +x INIT.sh
+$ ./INIT.sh
+```
+
+Bash (from project root directory)
 ``` 
 $ mkdir build && cd build
 $ cmake ..
