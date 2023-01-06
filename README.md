@@ -16,13 +16,24 @@ The dependencies are added as git submodules.
 * [Dear ImGUI](https://github.com/ocornut/imgui)
 * [ImPlot](https://github.com/epezent/implot)
 
+
+
+
 ## Build
+### Linux
+Install deps
+``` 
+sudo apt install xorg-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
+``` 
+
 Bash
 ``` 
 $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 ```
+
+### Windows
 Powershell
 ``` 
 $ mkdir build && cd build
